@@ -57,6 +57,9 @@
           <div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600">70 · 20 · 10</div>
           <div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600">Skill GAP</div>
         </div>
+        <button onClick="{{ onManual }}" style="margin-top:18px;display:inline-flex;align-items:center;gap:9px;align-self:flex-start;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:11px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;backdrop-filter:blur(2px)" style-hover="background:rgba(255,255,255,.24)">
+          <span style="font-size:16px">📖</span>{{ tx.manualBtn }}
+        </button>
       </div>
       <div style="padding:44px 40px;display:flex;flex-direction:column;justify-content:center">
         <div style="display:flex;justify-content:flex-end;margin-bottom:18px">
@@ -404,6 +407,7 @@ class Component extends DCLogic {
       saveErr:'บันทึกไม่สำเร็จ กรุณาลองใหม่',
       measureLabel:'วิธีวัด/ประเมินผล', partnerLabel:'พัฒนาร่วมกับ',
       printPdf:'พิมพ์ / PDF', loginLoading:'กำลังตรวจสอบ...', popupBlocked:'กรุณาอนุญาต pop-up เพื่อพิมพ์',
+      manualBtn:'คู่มือการใช้งาน (PDF)', manualDownload:'ดาวน์โหลด / พิมพ์ PDF',
     },
     en: {
       appName:'Individual Development Plan', tagline:'Individual Development Plan',
@@ -435,6 +439,7 @@ class Component extends DCLogic {
       saveErr:'Save failed, please try again',
       measureLabel:'How to measure', partnerLabel:'Develop with',
       printPdf:'Print / PDF', loginLoading:'Checking...', popupBlocked:'Please allow pop-ups to print',
+      manualBtn:'User Manual (PDF)', manualDownload:'Download / Print PDF',
     },
     ja: {
       appName:'個人能力開発計画', tagline:'Individual Development Plan',
@@ -466,6 +471,7 @@ class Component extends DCLogic {
       saveErr:'保存に失敗しました。再試行してください',
       measureLabel:'測定方法', partnerLabel:'連携先',
       printPdf:'印刷 / PDF', loginLoading:'確認中...', popupBlocked:'印刷するにはポップアップを許可してください',
+      manualBtn:'使い方ガイド (PDF)', manualDownload:'ダウンロード / 印刷 PDF',
     },
   };
 
@@ -653,6 +659,177 @@ class Component extends DCLogic {
   }
 
   esc(v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  MANUAL = {
+    th: {
+      title:'คู่มือการใช้งานระบบ', subtitle:'แผนพัฒนารายบุคคล (IDP) · หลักการเรียนรู้ 70 : 20 : 10',
+      intro:'ระบบ IDP ช่วยให้พนักงาน GJS / GST นำผลประเมินทักษะ (Skill Assessment) มาวางแผนพัฒนาตนเองอย่างเป็นระบบ ตามหลัก 70 : 20 : 10 พร้อมคำแนะนำจาก AI และส่งข้อมูลเก็บไว้ที่ส่วนกลางได้ทันที',
+      sections:[
+        { h:'1. เข้าสู่ระบบ', b:[
+          'กรอก "รหัสพนักงาน" ของคุณในช่อง แล้วกดปุ่มเข้าสู่ระบบ (หรือกด Enter)',
+          'ระบบจะดึงผลประเมินทักษะล่าสุดของคุณจากฐานข้อมูลกลางมาแสดงโดยอัตโนมัติ',
+          'หากกรอกรหัสไม่ถูกต้อง ระบบจะแจ้งว่าไม่พบรหัสในระบบประเมิน',
+          'เปลี่ยนภาษาได้ที่มุมขวาบน (ไทย / English / 日本語)' ] },
+        { h:'2. หน้าภาพรวม & Skill GAP', b:[
+          'แสดงข้อมูลพนักงาน ตำแหน่ง แผนก และวันที่ประเมิน',
+          'Radar Chart เปรียบเทียบ "ระดับปัจจุบัน" (พื้นทึบสีน้ำเงิน) กับ "ระดับเป้าหมาย" (เส้นประ)',
+          'ตารางทางขวาแสดงทุกทักษะพร้อมค่า GAP — เลข -1, -2 (สีแดง) คือทักษะที่ยังต่ำกว่าเป้าหมาย ควรนำมาพัฒนา',
+          'กดปุ่ม "เลือก" ที่ทักษะใดก็ได้ เพื่อเพิ่มเข้าสู่แผนพัฒนา' ] },
+        { h:'3. วางแผนพัฒนา (IDP Plan)', b:[
+          'ไปที่แท็บ "แผนพัฒนา IDP"',
+          'เพิ่มทักษะได้ 2 วิธี: กดชิปทักษะที่มี GAP ด้านบน หรือพิมพ์ชื่อทักษะใหม่เองในช่อง แล้วกด "เพิ่ม"',
+          'แต่ละทักษะมี 3 ช่องตามหลัก 70 : 20 : 10 ให้กรอกแผน' ] },
+        { h:'4. หลักการ 70 : 20 : 10', b:[
+          '70% ลงมือทำจริง (On-the-job): เรียนรู้จากงานจริง โปรเจกต์ การหมุนเวียนงาน งานที่ท้าทาย',
+          '20% เรียนรู้จากผู้อื่น (Social): โค้ชชิ่ง พี่เลี้ยง การขอ feedback เรียนจากผู้เชี่ยวชาญ',
+          '10% อบรม/หลักสูตร (Formal): การอบรม สัมมนา e-learning อ่านหนังสือหรือมาตรฐาน',
+          'แต่ละช่องมีตัวอย่าง (ข้อความสีเทา) เป็นแนวทางในการกรอก' ] },
+        { h:'5. ปุ่ม AI ช่วยแนะนำ', b:[
+          'กดปุ่ม "✦ AI ช่วยแนะนำแนวทางพัฒนา" ใต้แต่ละทักษะ',
+          'ระบบจะเติมข้อเสนอแนะการพัฒนาในช่อง 70 / 20 / 10 ให้อัตโนมัติ (เฉพาะช่องที่ยังว่าง)',
+          'พร้อมแสดงวิธีวัด/ประเมินผล และแผนกที่ควรพัฒนาทักษะร่วมกัน',
+          'คุณสามารถแก้ไขข้อความที่ AI แนะนำได้ตามความเหมาะสม' ] },
+        { h:'6. สถานะการพัฒนา', b:[
+          'แต่ละทักษะเลือกสถานะได้ 3 ระดับ: Plan (วางแผน) · On-going (กำลังดำเนินการ) · Completed (เสร็จสิ้น)',
+          'กดที่ปุ่มสถานะเพื่ออัปเดต ความคืบหน้าจะแสดงรวมที่ด้านบน (เสร็จแล้ว / ทั้งหมด)',
+          'กำหนด "เป้าหมาย" (เดือน/ปี) ที่จะพัฒนาให้สำเร็จได้' ] },
+        { h:'7. ความเห็น/หมายเหตุ (หัวหน้างาน)', b:[
+          'ช่อง "ความเห็น / หมายเหตุ" สำหรับหัวหน้างานบันทึกคำแนะนำ หรือหมายเหตุเกี่ยวกับการพัฒนา',
+          'ข้อมูลนี้จะถูกบันทึกไปพร้อมกับแผนพัฒนา' ] },
+        { h:'8. บันทึกข้อมูล', b:[
+          'กดปุ่ม "บันทึกแผน" ระบบจะส่งข้อมูลทั้งหมดไปเก็บที่ส่วนกลาง (Google Sheet)',
+          'ข้อมูลจะถูกเก็บในเครื่องด้วย จึงไม่หายแม้ปิดหน้าจอ — เมื่อ login ใหม่จะเห็นแผนเดิม' ] },
+        { h:'9. พิมพ์ / ดาวน์โหลด PDF', b:[
+          'ในหน้าแผนพัฒนา กดปุ่ม "พิมพ์ / PDF" มุมขวาบน',
+          'ระบบจะเปิดหน้ารายงานสรุปแผน IDP กดพิมพ์แล้วเลือก "Save as PDF" เพื่อบันทึกเป็นไฟล์ได้' ] },
+      ],
+      footer:'หากพบปัญหาการใช้งาน กรุณาติดต่อฝ่ายพัฒนาทรัพยากรบุคคล (HRD)'
+    },
+    en: {
+      title:'User Manual', subtitle:'Individual Development Plan (IDP) · 70 : 20 : 10 Learning Model',
+      intro:'The IDP system helps GJS / GST employees turn their Skill Assessment results into a structured self-development plan using the 70 : 20 : 10 model, with AI guidance and instant central storage.',
+      sections:[
+        { h:'1. Sign in', b:[
+          'Enter your Employee ID and click Sign in (or press Enter).',
+          'The system automatically loads your latest Skill Assessment from the central database.',
+          'If the ID is invalid, it will say the ID was not found in the assessment.',
+          'Switch language at the top-right (ไทย / English / 日本語).' ] },
+        { h:'2. Overview & Skill GAP', b:[
+          'Shows your profile, position, department and assessment date.',
+          'The Radar Chart compares your "Current level" (solid blue) with the "Target level" (dashed).',
+          'The table lists every skill with its GAP — values like -1, -2 (red) are below target and should be developed.',
+          'Click "Add" on any skill to put it into your development plan.' ] },
+        { h:'3. IDP Plan', b:[
+          'Open the "IDP Plan" tab.',
+          'Add skills two ways: click a GAP-skill chip at the top, or type a new skill name and click "Add".',
+          'Each skill has three fields following the 70 : 20 : 10 model.' ] },
+        { h:'4. The 70 : 20 : 10 Model', b:[
+          '70% On-the-job: learn from real work, projects, job rotation and stretch assignments.',
+          '20% Learning from others: coaching, mentoring, asking for feedback, learning from experts.',
+          '10% Formal training: courses, seminars, e-learning, reading books or standards.',
+          'Each field shows a grey example as guidance.' ] },
+        { h:'5. AI Suggestion button', b:[
+          'Click "✦ AI development suggestions" under each skill.',
+          'The system auto-fills the 70 / 20 / 10 fields (only the empty ones).',
+          'It also shows how to measure progress and which departments to develop the skill with.',
+          'You can freely edit the AI text afterwards.' ] },
+        { h:'6. Development status', b:[
+          'Each skill has three statuses: Plan · On-going · Completed.',
+          'Click a status to update it; overall progress is shown at the top (done / total).',
+          'Set a target month/year for completion.' ] },
+        { h:'7. Comment / Remark (Supervisor)', b:[
+          'The "Comment / Remark" field is for the supervisor to add advice or development notes.',
+          'It is saved together with the plan.' ] },
+        { h:'8. Save', b:[
+          'Click "Save plan" to send all data to central storage (Google Sheet).',
+          'Data is also kept on your device, so it is not lost — your plan reappears when you sign in again.' ] },
+        { h:'9. Print / Download PDF', b:[
+          'On the plan page, click "Print / PDF" at the top-right.',
+          'A summary report opens; print it and choose "Save as PDF" to keep a file.' ] },
+      ],
+      footer:'For any issues, please contact Human Resource Development (HRD).'
+    },
+    ja: {
+      title:'システム利用ガイド', subtitle:'個人能力開発計画 (IDP) · 70 : 20 : 10 学習モデル',
+      intro:'IDPシステムは、GJS / GST の社員がスキル評価の結果をもとに、70 : 20 : 10 モデルで体系的な自己開発計画を立てるのを支援します。AIの提案と、中央への即時保存に対応しています。',
+      sections:[
+        { h:'1. ログイン', b:[
+          '社員番号を入力し、ログインを押す（またはEnter）。',
+          '最新のスキル評価が中央データベースから自動的に読み込まれます。',
+          '番号が無効な場合は、評価に該当がないと表示されます。',
+          '右上で言語を切り替えできます（ไทย / English / 日本語）。' ] },
+        { h:'2. 概要 & スキルGAP', b:[
+          'プロフィール、役職、部門、評価日を表示します。',
+          'レーダーチャートは「現在のレベル」（青の塗り）と「目標レベル」（破線）を比較します。',
+          '表は各スキルとGAPを表示 — -1, -2（赤）は目標未達で、開発対象です。',
+          '任意のスキルの「追加」を押すと開発計画に入ります。' ] },
+        { h:'3. IDP計画', b:[
+          '「IDP計画」タブを開きます。',
+          'スキル追加は2通り：上部のGAPスキルのチップを押す、または新しいスキル名を入力して「追加」。',
+          '各スキルに 70 : 20 : 10 モデルの3つの欄があります。' ] },
+        { h:'4. 70 : 20 : 10 モデル', b:[
+          '70% 実務：実際の業務・プロジェクト・ジョブローテーション・挑戦的な業務から学ぶ。',
+          '20% 他者からの学び：コーチング、メンタリング、フィードバック、専門家から学ぶ。',
+          '10% 研修：講座、セミナー、eラーニング、書籍や規格の購読。',
+          '各欄にはグレーの例がガイドとして表示されます。' ] },
+        { h:'5. AI提案ボタン', b:[
+          '各スキルの下の「✦ AI開発提案」を押します。',
+          '70 / 20 / 10 の欄（空欄のみ）が自動入力されます。',
+          '測定方法と、連携すべき部門も表示されます。',
+          'AIの文章は自由に編集できます。' ] },
+        { h:'6. 開発ステータス', b:[
+          '各スキルに3つのステータス：計画 · 進行中 · 完了。',
+          'ステータスを押して更新。全体の進捗は上部に表示（完了 / 合計）。',
+          '完了の目標時期（年月）を設定できます。' ] },
+        { h:'7. コメント / 備考（上司）', b:[
+          '「コメント / 備考」欄は、上司が助言や開発メモを記入するためのものです。',
+          '計画と一緒に保存されます。' ] },
+        { h:'8. 保存', b:[
+          '「計画を保存」を押すと、全データが中央（Google スプレッドシート）に送信されます。',
+          'データは端末にも保存されるため失われません。再ログイン時に計画が再表示されます。' ] },
+        { h:'9. 印刷 / PDFダウンロード', b:[
+          '計画ページの右上「印刷 / PDF」を押します。',
+          'サマリーレポートが開きます。印刷して「PDFとして保存」でファイル化できます。' ] },
+      ],
+      footer:'問題が発生した場合は、人材開発部（HRD）にお問い合わせください。'
+    },
+  };
+
+  printManual() {
+    const lang = this.state.lang, tx = this.t();
+    const m = this.MANUAL[lang] || this.MANUAL.en;
+    const logo = (document.querySelector('img') || {}).src || '';
+    const secs = m.sections.map(sec => {
+      const items = sec.b.map(x => '<li>' + this.esc(x) + '</li>').join('');
+      return '<div class="sec"><h3>' + this.esc(sec.h) + '</h3><ul>' + items + '</ul></div>';
+    }).join('');
+    const html = '<!doctype html><html lang="' + lang + '"><head><meta charset="utf-8"><title>' + this.esc(m.title) + ' - IDP</title>'
+      + '<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">'
+      + '<style>'
+      + '*{box-sizing:border-box;margin:0;padding:0}'
+      + 'body{font-family:"IBM Plex Sans Thai","Noto Sans JP",sans-serif;color:#1e293b;padding:34px 38px;font-size:13px;line-height:1.65;max-width:900px;margin:0 auto}'
+      + '.top{display:flex;align-items:center;gap:16px;border-bottom:3px solid #1e5fa8;padding-bottom:16px;margin-bottom:18px}'
+      + '.top img{height:52px}'
+      + '.top h1{font-size:23px;color:#0f3d6e}'
+      + '.top .sub{font-size:12px;color:#64748b;margin-top:3px}'
+      + '.intro{background:#f3f8fd;border:1px solid #d6e6f6;border-left:4px solid #1e5fa8;border-radius:10px;padding:14px 16px;margin-bottom:22px;color:#334155}'
+      + '.sec{margin-bottom:16px;break-inside:avoid;page-break-inside:avoid}'
+      + '.sec h3{font-size:15px;color:#1e5fa8;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid #eef2f7}'
+      + '.sec ul{padding-left:20px}'
+      + '.sec li{margin-bottom:5px}'
+      + '.foot{margin-top:24px;border-top:1px solid #eef2f7;padding-top:12px;font-size:11px;color:#94a3b8;display:flex;justify-content:space-between}'
+      + '@media print{body{padding:0}@page{margin:16mm}}'
+      + '</style></head><body>'
+      + '<div class="top">' + (logo ? '<img src="' + logo + '">' : '') + '<div><h1>' + this.esc(m.title) + '</h1><div class="sub">' + this.esc(m.subtitle) + '</div></div></div>'
+      + '<div class="intro">' + this.esc(m.intro) + '</div>'
+      + secs
+      + '<div class="foot"><span>' + this.esc(m.footer) + '</span><span>' + this.esc(tx.appName) + ' · ' + new Date().toLocaleDateString() + '</span></div>'
+      + '</body></html>';
+    const w = window.open('', '_blank');
+    if (!w) { this.showToast(tx.popupBlocked); return; }
+    w.document.write(html); w.document.close(); w.focus();
+    setTimeout(() => { try { w.print(); } catch (e) {} }, 500);
+  }
 
   printPlan() {
     const emp = this.state.emp, tx = this.t();
@@ -881,6 +1058,7 @@ class Component extends DCLogic {
         onLogin: () => this.doLogin(),
         loggingIn: s.loggingIn,
         loginBtnLabel: s.loggingIn ? tx.loginLoading : tx.loginBtn,
+        onManual: () => this.printManual(),
         demoIds: Object.values(this.ASSESS).map(a => ({ id:a.id, name:a.name, onPick:()=>this.doLogin(a.id) })),
       });
     }
