@@ -341,9 +341,9 @@ class Component extends DCLogic {
     toast: '',
   };
 
-  // ====== CONFIG ======
+  // ====== CONFIG ======  (idp_v1_1 hotfix 2026-11-11: URL -> IDP GAS v1.1, save() checks result, KB name normalisation)
   // วาง URL ของ Google Apps Script Web App ที่ deploy แล้วตรงนี้ เพื่อบันทึกลง Google Sheet
-  APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwRU1vSvDrLMetTIlALGPqjZqIJ7fG8rYsBQxi6gBnHgdwIxpb_Ly6P2iWqq2vELLF40g/exec';
+  APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxeVCtvwJGwWjQsIVN-Imh-pPQbYwZGhw4vjFFgJ9XRhy_qHF8j_6xpfD2XpCmJk3LL/exec';
 
   // ====== DATA: Skill Assessment (จาก Claude / Google Sheet) ======
   ASSESS = {
@@ -404,7 +404,7 @@ class Component extends DCLogic {
       targetDate:'กำหนดเป้าหมาย', removeRow:'ลบทักษะนี้',
       save:'บันทึกแผน', saving:'กำลังบันทึก...',
       savedSheet:'บันทึกแผนลง Google Sheet เรียบร้อยแล้ว', savedLocal:'บันทึกแผนเรียบร้อย (ยังไม่ได้เชื่อม Google Sheet)',
-      saveErr:'บันทึกไม่สำเร็จ กรุณาลองใหม่',
+      saveErr:'บันทึกไม่สำเร็จ กรุณาลองใหม่', saveErrSheet:'บันทึกในเครื่องนี้แล้ว แต่ส่งเข้า Google Sheet ไม่สำเร็จ กรุณากดบันทึกอีกครั้ง',
       measureLabel:'วิธีวัด/ประเมินผล', partnerLabel:'พัฒนาร่วมกับ',
       printPdf:'พิมพ์ / PDF', loginLoading:'กำลังตรวจสอบ...', popupBlocked:'กรุณาอนุญาต pop-up เพื่อพิมพ์',
       manualBtn:'คู่มือการใช้งาน (PDF)', manualDownload:'ดาวน์โหลด / พิมพ์ PDF',
@@ -436,7 +436,7 @@ class Component extends DCLogic {
       targetDate:'Target date', removeRow:'Remove skill',
       save:'Save plan', saving:'Saving...',
       savedSheet:'Saved to Google Sheet successfully', savedLocal:'Plan saved (Google Sheet not connected yet)',
-      saveErr:'Save failed, please try again',
+      saveErr:'Save failed, please try again', saveErrSheet:'Saved on this device, but sending to Google Sheet failed. Please press Save again',
       measureLabel:'How to measure', partnerLabel:'Develop with',
       printPdf:'Print / PDF', loginLoading:'Checking...', popupBlocked:'Please allow pop-ups to print',
       manualBtn:'User Manual (PDF)', manualDownload:'Download / Print PDF',
@@ -468,7 +468,7 @@ class Component extends DCLogic {
       targetDate:'目標時期', removeRow:'スキルを削除',
       save:'計画を保存', saving:'保存中...',
       savedSheet:'Google スプレッドシートに保存しました', savedLocal:'計画を保存しました（Google スプレッドシート未接続）',
-      saveErr:'保存に失敗しました。再試行してください',
+      saveErr:'保存に失敗しました。再試行してください', saveErrSheet:'この端末には保存しましたが、スプレッドシートへの送信に失敗しました。もう一度保存してください',
       measureLabel:'測定方法', partnerLabel:'連携先',
       printPdf:'印刷 / PDF', loginLoading:'確認中...', popupBlocked:'印刷するにはポップアップを許可してください',
       manualBtn:'使い方ガイド (PDF)', manualDownload:'ダウンロード / 印刷 PDF',
@@ -932,7 +932,8 @@ class Component extends DCLogic {
       const p = this.state.plans.find(x => x.id === id);
       if (!p) return;
       const lang = this.state.lang, tx = this.t();
-      const key = (p.skillName || '').toLowerCase().trim();
+      let key = (p.skillName || '').toLowerCase().replace(/&/g, 'and').replace(/\s+/g, ' ').trim();
+      if (key === 'effective communication') key = 'communication';
       const kb = this.KB[key];
       let s70, s20, s10, measure, partner;
       if (kb) {
@@ -977,14 +978,18 @@ class Component extends DCLogic {
       return;
     }
     try {
-      await fetch(this.APPS_SCRIPT_URL, {
+      const res = await fetch(this.APPS_SCRIPT_URL, {
         method:'POST',
         headers:{ 'Content-Type':'text/plain;charset=utf-8' },
         body: JSON.stringify(payload),
       });
-      this.setState({ saving:false }); this.showToast(tx.savedSheet);
+      // v1.1: ตรวจผลจริงจาก GAS ({ok:true}) แทนการถือว่า HTTP 200 = สำเร็จ
+      let okSheet = false;
+      try { const j = await res.json(); okSheet = !!(j && j.ok === true); } catch (e2) { okSheet = false; }
+      this.setState({ saving:false });
+      this.showToast(okSheet ? tx.savedSheet : tx.saveErrSheet);
     } catch(e) {
-      this.setState({ saving:false }); this.showToast(tx.saveErr);
+      this.setState({ saving:false }); this.showToast(tx.saveErrSheet);
     }
   }
 
